@@ -16,47 +16,40 @@ public class CourierLoginTest {
     public static final String EMPTY_LOGIN_OR_PASSWORD_LOGIN_MESSAGE = "Недостаточно данных для входа";
     public static final String NOT_FOUND_LOGIN_COURIER_MESSAGE = "Учетная запись не найдена";
 
-    private CourierClient cc;
+    private CourierClient courierClient;
     private Courier courier;
-    private Integer courierId;
     private Courier notExistCourier = CourierGenerator.getRandom();
 
     @Before
     public void setUp() {
-        cc = new CourierClient();
+        courierClient = new CourierClient();
         courier = CourierGenerator.getRandom();
 
-    }
-
-    @After
-    public void cleanUp() {
-        if (courierId != null) {
-            cc.delete(courierId);
-        }
     }
 
     @Test
     @DisplayName("Авторизация курьера")
     @Description("Проверяется возможность авторизации курьера")
     public void courierCanBeAuthorized() {
-        ValidatableResponse createCourierResponse = cc.create(courier);
-        ValidatableResponse loginResponse = cc.login(CourierCredentials.from(courier));
+        ValidatableResponse createCourierResponse = courierClient.create(courier);
+        ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier));
 
         int statusCode = loginResponse.extract().statusCode();
-        courierId = loginResponse.extract().path("id");
+        int courierId = loginResponse.extract().path("id");
 
         assertEquals(200, statusCode);
         assertThat(courierId, notNullValue());
         assertThat(courierId, Matchers.greaterThan(0));
 
+        courierClient.delete(courierId);
     }
 
     @Test
     @DisplayName("Авторизация курьера без логина")
     @Description("Проверяется невозможность авторизации курьера")
     public void courierAuthWithoutLoginFail() {
-        ValidatableResponse createCourierResponse = cc.create(courier);
-        ValidatableResponse loginResponse = cc.login(CourierCredentials.from(courier.setLogin(null)));
+        ValidatableResponse createCourierResponse = courierClient.create(courier);
+        ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setLogin(null)));
 
         int statusCode = loginResponse.extract().statusCode();
         String responseMessage = loginResponse.extract().path("message");
@@ -69,8 +62,8 @@ public class CourierLoginTest {
     @DisplayName("Авторизация курьера без пароля")
     @Description("Проверяется невозможность авторизации курьера")
     public void courierAuthWithoutPasswordFail() {
-        ValidatableResponse createCourierResponse = cc.create(courier);
-        ValidatableResponse loginResponse = cc.login(CourierCredentials.from(courier.setPassword(null)));
+        ValidatableResponse createCourierResponse = courierClient.create(courier);
+        ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setPassword(null)));
 
         int statusCode = loginResponse.extract().statusCode();
 
@@ -81,8 +74,8 @@ public class CourierLoginTest {
     @DisplayName("Авторизация курьера c некорректным логином")
     @Description("Проверяется невозможность авторизации курьера c некорректным логином")
     public void courierAuthIncorrectLoginFail() {
-        ValidatableResponse createCourierResponse = cc.create(courier);
-        ValidatableResponse loginResponse = cc.login(CourierCredentials.from(courier.setLogin("UNKNOWN_COURIER")));
+        ValidatableResponse createCourierResponse = courierClient.create(courier);
+        ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setLogin("UNKNOWN_COURIER")));
 
         int statusCode = loginResponse.extract().statusCode();
         String responseMessage = loginResponse.extract().path("message");
@@ -95,8 +88,8 @@ public class CourierLoginTest {
     @DisplayName("Авторизация курьера c некорректным паролем")
     @Description("Проверяется невозможность авторизации курьера c некорректным паролем")
     public void courierAuthIncorrectPasswordFail() {
-        ValidatableResponse createCourierResponse = cc.create(courier);
-        ValidatableResponse loginResponse = cc.login(CourierCredentials.from(courier.setPassword("UNKNOWN_COURIER")));
+        ValidatableResponse createCourierResponse = courierClient.create(courier);
+        ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setPassword("UNKNOWN_COURIER")));
 
         int statusCode = loginResponse.extract().statusCode();
         String responseMessage = loginResponse.extract().path("message");
@@ -109,7 +102,7 @@ public class CourierLoginTest {
     @DisplayName("Авторизация несуществующего курьера")
     @Description("Проверяется невозможность авторизации курьера с несуществующей парой логин+пароль")
     public void courierNotCreatedAuthFailed() {
-        ValidatableResponse loginResponse = cc.login(CourierCredentials.from(notExistCourier));
+        ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(notExistCourier));
 
         int statusCode = loginResponse.extract().statusCode();
         String responseMessage = loginResponse.extract().path("message");

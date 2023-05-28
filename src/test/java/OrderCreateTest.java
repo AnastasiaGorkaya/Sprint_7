@@ -23,7 +23,7 @@ public class OrderCreateTest {
     private final String deliveryDate;
     private final String comment;
     private final String[] color;
-    private OrderClient oc;
+    private OrderClient orderClient;
     private Order order;
 
     public OrderCreateTest(String firstName, String lastName, String address, String metroStation, String phone, int rentTime, String deliveryDate, String comment, String[] color) {
@@ -51,7 +51,7 @@ public class OrderCreateTest {
 
     @Before
     public void setUp(){
-        oc = new OrderClient();
+        orderClient = new OrderClient();
         order = new Order(firstName,lastName,address,metroStation,phone,rentTime,deliveryDate,comment,color);
     }
 
@@ -59,7 +59,7 @@ public class OrderCreateTest {
     @DisplayName("Создание заказа")
     @Description("Проверяется возможность создания заказа")
     public void orderCanBeCreated() {
-        ValidatableResponse createOrderResponse = oc.create(order);
+        ValidatableResponse createOrderResponse = orderClient.create(order);
 
         int statusCode = createOrderResponse.extract().statusCode();
         int orderId = createOrderResponse.extract().path("track");
@@ -67,7 +67,5 @@ public class OrderCreateTest {
         assertThat(orderId, notNullValue());
         assertThat(orderId, Matchers.greaterThan(0));
         assertEquals(201, statusCode);
-
-        System.out.println(orderId);
     }
 }

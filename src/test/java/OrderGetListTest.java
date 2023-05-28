@@ -13,12 +13,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class OrderGetListTest {
-    private OrderClient oc;
+    private OrderClient orderClient;
     private List<Order> orderList;
 
     @Before
     public void setUp(){
-        oc = new OrderClient();
+        orderClient = new OrderClient();
         orderList = new ArrayList<>();
     }
 
@@ -26,7 +26,7 @@ public class OrderGetListTest {
     @DisplayName("Получение списка заказов")
     @Description("Проверяется возможность получения спика заказов")
     public void orderListCanBeReturnedSuccess() {
-        ValidatableResponse getOrdersResponse = oc.getOrders();
+        ValidatableResponse getOrdersResponse = orderClient.getOrders();
 
         int statusCode = getOrdersResponse.extract().statusCode();
         orderList = getOrdersResponse.extract().path("orders");
