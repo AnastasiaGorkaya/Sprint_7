@@ -2,7 +2,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import models.Courier;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -54,7 +53,6 @@ public class CourierCreateTest {
 
         assertEquals(400, statusCode);
         assertEquals(EMPTY_LOGIN_OR_PASSWORD_CREATE_MESSAGE, responseMessage);
-
     }
 
     @Test

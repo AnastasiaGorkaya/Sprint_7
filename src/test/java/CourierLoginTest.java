@@ -1,11 +1,8 @@
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
-import io.restassured.parsing.Parser;
 import io.restassured.response.ValidatableResponse;
 import models.Courier;
 import org.hamcrest.Matchers;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,7 +21,6 @@ public class CourierLoginTest {
     public void setUp() {
         courierClient = new CourierClient();
         courier = CourierGenerator.getRandom();
-
     }
 
     @Test
@@ -49,6 +45,7 @@ public class CourierLoginTest {
     @Description("Проверяется невозможность авторизации курьера")
     public void courierAuthWithoutLoginFail() {
         ValidatableResponse createCourierResponse = courierClient.create(courier);
+        ValidatableResponse validLoginResponse = courierClient.login(CourierCredentials.from(courier));
         ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setLogin(null)));
 
         int statusCode = loginResponse.extract().statusCode();
@@ -56,6 +53,9 @@ public class CourierLoginTest {
 
         assertEquals(EMPTY_LOGIN_OR_PASSWORD_LOGIN_MESSAGE, responseMessage);
         assertEquals(400, statusCode);
+
+        int courierId = validLoginResponse.extract().path("id");
+        courierClient.delete(courierId);
     }
 
     @Test
@@ -63,11 +63,15 @@ public class CourierLoginTest {
     @Description("Проверяется невозможность авторизации курьера")
     public void courierAuthWithoutPasswordFail() {
         ValidatableResponse createCourierResponse = courierClient.create(courier);
+        ValidatableResponse validLoginResponse = courierClient.login(CourierCredentials.from(courier));
         ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setPassword(null)));
 
         int statusCode = loginResponse.extract().statusCode();
 
         assertEquals(504, statusCode);
+
+        int courierId = validLoginResponse.extract().path("id");
+        courierClient.delete(courierId);
     }
 
     @Test
@@ -75,6 +79,7 @@ public class CourierLoginTest {
     @Description("Проверяется невозможность авторизации курьера c некорректным логином")
     public void courierAuthIncorrectLoginFail() {
         ValidatableResponse createCourierResponse = courierClient.create(courier);
+        ValidatableResponse validLoginResponse = courierClient.login(CourierCredentials.from(courier));
         ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setLogin("UNKNOWN_COURIER")));
 
         int statusCode = loginResponse.extract().statusCode();
@@ -82,6 +87,9 @@ public class CourierLoginTest {
 
         assertEquals(NOT_FOUND_LOGIN_COURIER_MESSAGE, responseMessage);
         assertEquals(404, statusCode);
+
+        int courierId = validLoginResponse.extract().path("id");
+        courierClient.delete(courierId);
     }
 
     @Test
@@ -89,6 +97,7 @@ public class CourierLoginTest {
     @Description("Проверяется невозможность авторизации курьера c некорректным паролем")
     public void courierAuthIncorrectPasswordFail() {
         ValidatableResponse createCourierResponse = courierClient.create(courier);
+        ValidatableResponse validLoginResponse = courierClient.login(CourierCredentials.from(courier));
         ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setPassword("UNKNOWN_COURIER")));
 
         int statusCode = loginResponse.extract().statusCode();
@@ -96,6 +105,9 @@ public class CourierLoginTest {
 
         assertEquals(NOT_FOUND_LOGIN_COURIER_MESSAGE, responseMessage);
         assertEquals(404, statusCode);
+
+        int courierId = validLoginResponse.extract().path("id");
+        courierClient.delete(courierId);
     }
 
     @Test
