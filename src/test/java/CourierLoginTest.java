@@ -3,6 +3,7 @@ import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import models.Courier;
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,11 +17,19 @@ public class CourierLoginTest {
     private CourierClient courierClient;
     private Courier courier;
     private Courier notExistCourier = CourierGenerator.getRandom();
+    private int courierId = -1;
 
     @Before
     public void setUp() {
         courierClient = new CourierClient();
         courier = CourierGenerator.getRandom();
+    }
+
+    @After
+    public void tearDown() {
+        if (courierId != -1) {
+            courierClient.delete(courierId);
+        }
     }
 
     @Test
@@ -31,13 +40,11 @@ public class CourierLoginTest {
         ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier));
 
         int statusCode = loginResponse.extract().statusCode();
-        int courierId = loginResponse.extract().path("id");
+        courierId = loginResponse.extract().path("id");
 
         assertEquals(200, statusCode);
         assertThat(courierId, notNullValue());
         assertThat(courierId, Matchers.greaterThan(0));
-
-        courierClient.delete(courierId);
     }
 
     @Test
@@ -49,13 +56,11 @@ public class CourierLoginTest {
         ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setLogin(null)));
 
         int statusCode = loginResponse.extract().statusCode();
+        courierId = validLoginResponse.extract().path("id");
         String responseMessage = loginResponse.extract().path("message");
 
         assertEquals(EMPTY_LOGIN_OR_PASSWORD_LOGIN_MESSAGE, responseMessage);
         assertEquals(400, statusCode);
-
-        int courierId = validLoginResponse.extract().path("id");
-        courierClient.delete(courierId);
     }
 
     @Test
@@ -67,11 +72,9 @@ public class CourierLoginTest {
         ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setPassword(null)));
 
         int statusCode = loginResponse.extract().statusCode();
+        courierId = validLoginResponse.extract().path("id");
 
         assertEquals(504, statusCode);
-
-        int courierId = validLoginResponse.extract().path("id");
-        courierClient.delete(courierId);
     }
 
     @Test
@@ -83,13 +86,11 @@ public class CourierLoginTest {
         ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setLogin("UNKNOWN_COURIER")));
 
         int statusCode = loginResponse.extract().statusCode();
+        courierId = validLoginResponse.extract().path("id");
         String responseMessage = loginResponse.extract().path("message");
 
         assertEquals(NOT_FOUND_LOGIN_COURIER_MESSAGE, responseMessage);
         assertEquals(404, statusCode);
-
-        int courierId = validLoginResponse.extract().path("id");
-        courierClient.delete(courierId);
     }
 
     @Test
@@ -101,13 +102,11 @@ public class CourierLoginTest {
         ValidatableResponse loginResponse = courierClient.login(CourierCredentials.from(courier.setPassword("UNKNOWN_COURIER")));
 
         int statusCode = loginResponse.extract().statusCode();
+        courierId = validLoginResponse.extract().path("id");
         String responseMessage = loginResponse.extract().path("message");
 
         assertEquals(NOT_FOUND_LOGIN_COURIER_MESSAGE, responseMessage);
         assertEquals(404, statusCode);
-
-        int courierId = validLoginResponse.extract().path("id");
-        courierClient.delete(courierId);
     }
 
     @Test
